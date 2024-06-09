@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+
+	<link rel="canonical" href="https://demo-basic.adminkit.io/" />
+
+	<title>Main Screen</title>
+
+	<link href="css/app.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body onload="fetchAndPopulateData()">
+	<div class="wrapper">
+
+		<div class="main">
+
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<h1 class="h3 mb-3"><strong>Main</strong> Dashboard</h1>
+
+					<div class="row">
+						<div class="col-12 col-lg-12">
+							<div class="card">
+								<div class="card-body">
+									<h1 class="card-title">Raise defect</h1>
+									<hr>
+									<div class="row mb-3">
+										<div class="col-md-12">
+											<label for="engNo" class="form-control-label mb-3">Engine No.</label>
+											<input type="text" class="form-control form-control-lg"
+												placeholder="Engine No." id="engNo">
+										</div>
+
+									</div>
+
+									<div class="row mb-3">
+										<div class="col-md-12 mb-3">
+											<label for="defect" class="form-control-label mb-3">Select Defect
+												type</label>
+											<select class="form-control choices-single" id="defect">
+												<optgroup label="Select Defect type">
+													<option>One</option>
+													<option>Two</option>
+													<option>Three</option>
+												</optgroup>
+											</select>
+										</div>
+									</div>
+
+									<div class="row mb-3">
+										<div class="col-md-12 mb-3">
+											<label for="reason" class="form-control-label mb-3">Select Defect
+												type</label>
+											<select class="form-control choices-single" id="reason">
+												<optgroup label="Select Defect type">
+													<option>One</option>
+													<option>Two</option>
+													<option>Three</option>
+												</optgroup>
+											</select>
+										</div>
+									</div>
+
+									<hr>
+
+									<div class="row mb-3">
+										<div class="col-md-2">
+											<button class="btn btn-danger">Submit</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-12 col-lg-12">
+							<div class="card">
+								<div class="card-body">
+
+									<h1 class="card-title">Settings</h1>
+
+									<hr>
+
+									<div class="row mb-3">
+										<div class="col-md-2">
+											<button class="btn btn-primary" type="button" onclick="uploadData()">Update
+												Defects</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</main>
+
+			<footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-start">
+							<p class="mb-0">
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+
+	<script src="js/app.js"></script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			// Choices.js
+			//new Choices(document.querySelector("#defect"));
+			new Choices(document.querySelector("#reason"));
+		});
+	</script>
+
+	<script>
+		let choicesInstance;
+
+		function uploadData() {
+			fetch('/upload', {
+				method: 'GET'
+			})
+				.then(response => response.text())
+				.then(data => alert(data))
+				.catch(error => console.error('Error:', error));
+		}
+
+		function fetchAndPopulateData() {
+			fetch('/fetch-data', {
+				method: 'GET'
+			})
+				.then(response => response.json())
+				.then(data => populateSelect(data))
+				.catch(error => console.error('Error:', error));
+		}
+
+		function populateSelect(data) {
+			const select = document.getElementById('defect');
+			select.innerHTML = ''; // Clear previous options
+
+			data.forEach(item => {
+				const option = document.createElement('option');
+				option.value = item.id;
+				option.textContent = `${item.defect_name} - ${item.screen_no}`;
+				select.appendChild(option);
+			});
+
+			if (choicesInstance) {
+				choicesInstance.destroy();
+			}
+
+			choicesInstance = new Choices(select, { searchEnabled: true });
+		}
+	</script>
+
+</body>
+
+</html>
