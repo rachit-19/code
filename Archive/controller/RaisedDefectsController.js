@@ -32,12 +32,15 @@ function notifyClients(data) {
 exports.createRaisedDefect = async (req, res) => {
   try {
     console.log(req.body);
-    await RaisedDefects.createRaisedDefect(req.body);
+    const newDefect = await RaisedDefects.createRaisedDefect(req.body);
     const defectIds = req.body.defect.map((def) => def.value);
     const defects = await Promise.all(
       defectIds.map((id) => Defects.getDefectById(id))
     );
-    notifyClients({ ...req.body, defects });
+    // notifyClients({ ...req.body, defects });
+
+    console.log(newDefect, "hello")
+    notifyClients({ ...req.body, defects, updated_at: newDefect.data.updated_at });
     res.status(201).json({
       message: "Raised Defect created successfully",
       status: 201,

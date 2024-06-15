@@ -7,7 +7,7 @@ const Dashboard = () => {
   const user = useSelector((state) => state.auth.user)
   const state = useSelector((state) => state)
   useEffect(() => {
-    console.log(state)
+    console.log("state",state)
   }, [state])
   return (
     <>

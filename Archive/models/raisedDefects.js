@@ -21,11 +21,32 @@ class RaisedDefects {
             });
             return;
           }
-          resolve({
-            status: 201,
-            message: "Raised defect created successfully",
-            error: null,
-            data: result,
+
+          // Assuming result.insertId is available and updated_at is returned by the database
+          const insertedId = result.insertId;
+          const selectQuery =
+            "SELECT updated_at FROM raised_defects WHERE id = ?";
+
+          db.query(selectQuery, [insertedId], (selectErr, selectResult) => {
+            if (selectErr) {
+              reject({
+                status: 500,
+                message: "Error retrieving updated_at",
+                error: selectErr.message,
+              });
+              return;
+            }
+
+            const updated_at = selectResult[0].updated_at;
+            resolve({
+              status: 201,
+              message: "Raised defect created successfully",
+              error: null,
+              data: {
+                ...result,
+                updated_at: updated_at,
+              },
+            });
           });
         }
       );
