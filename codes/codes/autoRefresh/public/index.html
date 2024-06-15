@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Data Receiver</title>
+</head>
+<body>
+    <h1>TCP Data Receiver</h1>
+    <p id="tcpData"></p>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Connect to the WebSocket server
+        const socket = io();
+
+        // Event handler for receiving TCP data via WebSocket
+        socket.on('tcpData', (data) => {
+            console.log('Received TCP data:', data);
+            document.getElementById('tcpData').textContent = `TCP Data: ${data}`;
+        });
+    </script>
+</body>
+</html>

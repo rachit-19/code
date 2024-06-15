@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Refresh Data</title>
+</head>
+<body>
+    <h1>Data</h1>
+    <p id="randomData"></p>
+
+    <script>
+        // Function to fetch random data from the server
+        async function fetchRandomData() {
+            try {
+                // Send request to the server to get random data
+                const response = await fetch('/randomData');
+
+                // Check if the response is successful
+                if (response.ok) {
+                    // Parse the response text
+                    const randomData = await response.text();
+                    // Display the random data
+                    document.getElementById('randomData').textContent = `Data: ${randomData}`;
+                } else {
+                    throw new Error('Failed to get random data');
+                }
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
+        }
+
+        // Call the function initially
+        fetchRandomData();
+
+        // Call the function every 5 seconds
+        setInterval(fetchRandomData, 1000);
+    </script>
+</body>
+</html>
