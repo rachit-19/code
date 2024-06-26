@@ -3,15 +3,15 @@ const db = require("../db/connection");
 class RaisedDefects {
   static createRaisedDefect(raisedDefect) {
     return new Promise((resolve, reject) => {
-      const { engineSerialNumber, defect, actionTaken } = raisedDefect;
+      const { engineSerialNumber, defect, actionTaken, user } = raisedDefect;
       const defectsString = defect.map((def) => def.label).join(", ");
       const actionString = actionTaken.map((action) => action.label).join(", ");
       const query =
-        "INSERT INTO raised_defects (engine_serial_no, defects, actions) VALUES (?, ?, ?)";
+        "INSERT INTO raised_defects (engine_serial_no, defects, actions, user) VALUES (?, ?, ?, ?)";
 
       db.query(
         query,
-        [engineSerialNumber, defectsString, actionString],
+        [engineSerialNumber, defectsString, actionString, user],
         (err, result) => {
           if (err) {
             reject({
@@ -108,15 +108,15 @@ class RaisedDefects {
 
   static updateRaisedDefect(raisedDefectId, raisedDefectData) {
     return new Promise((resolve, reject) => {
-      const { engineSerialNumber, defects, actionTaken } = raisedDefectData;
+      const { engineSerialNumber, defects, actionTaken, user } = raisedDefectData;
       const defectsString = defects.map((def) => def.label).join(", ");
       const actionString = actionTaken.map((action) => action.label).join(", ");
       const query =
-        "UPDATE raised_defects SET engine_serial_no = ?, defects = ?, actions = ? WHERE id = ?";
+        "UPDATE raised_defects SET engine_serial_no = ?, defects = ?, actions = ?, user = ? WHERE id = ?";
 
       db.query(
         query,
-        [engineSerialNumber, defectsString, actionString, raisedDefectId],
+        [engineSerialNumber, defectsString, actionString, user, raisedDefectId],
         (err, result) => {
           if (err) {
             reject({
@@ -158,6 +158,42 @@ class RaisedDefects {
       });
     });
   }
-}
+
+  static getDefectReports() {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          rd.engine_serial_no, 
+          rd.defects, 
+          rd.actions, 
+          rd.updated_at,
+          rd.user,
+          d.defect_name,
+          d.station_id,
+          d.screen_no,
+          o.operator_name
+        FROM raised_defects rd
+        INNER JOIN defects d ON FIND_IN_SET(d.defect_name, rd.defects)
+        INNER JOIN operators o ON o.station_id = d.station_id
+      `;
+      db.query(query, (err, rows) => {
+        if (err) {
+          reject({
+            status: 500,
+            message: "Error fetching defect reports",
+            error: err.message,
+          });
+          return;
+        }
+        resolve({
+          status: 200,
+          message: "Defect reports fetched successfully",
+          error: null,
+          data: rows,
+        });
+      });
+    });
+  }
+} 
 
 module.exports = RaisedDefects;

@@ -1,5 +1,6 @@
 const RaisedDefects = require("../models/raisedDefects");
 const Defects = require("../models/defects")
+const Operators = require("../models/operators");
 
 
 const WebSocket = require("ws");
@@ -37,10 +38,19 @@ exports.createRaisedDefect = async (req, res) => {
     const defects = await Promise.all(
       defectIds.map((id) => Defects.getDefectById(id))
     );
-    // notifyClients({ ...req.body, defects });
+
+    const operators = await Promise.all(
+      defects.map((id) => Operators.getOperatorByStationId(id.station_id))
+    );
 
     console.log(newDefect, "hello")
-    notifyClients({ ...req.body, defects, updated_at: newDefect.data.updated_at });
+    notifyClients({
+      ...req.body,
+      defects,
+      operators,
+      active_clients: clients.length,
+      updated_at: newDefect.data.updated_at,
+    });
     res.status(201).json({
       message: "Raised Defect created successfully",
       status: 201,
@@ -114,3 +124,13 @@ exports.deleteRaisedDefect = async (req, res) => {
     res.status(500).send("Error deleting raised defect");
   }
 };
+
+exports.defectsReport = async (req, res) => {
+  try {
+    const response = await RaisedDefects.getDefectReports();
+    res.status(response.status).json(response);
+  } catch (error) {
+    res.status(error.status || 500).json(error);
+  }
+};
+

@@ -10,9 +10,16 @@ router.post(
   authenticateToken,
   raisedDefectsController.createBulkRaisedDefect
 );
+router.get(
+  "/defectsReport",
+  authenticateToken,
+  raisedDefectsController.defectsReport
+);
 router.get("/", authenticateToken, raisedDefectsController.getAllRaisedDefects);
 router.get("/:id", authenticateToken, raisedDefectsController.getRaisedDefectById);
 router.put("/:id", authenticateToken, raisedDefectsController.updateRaisedDefect);
 router.delete("/:id", authenticateToken, raisedDefectsController.deleteRaisedDefect);
+
+
 
 module.exports = router;

@@ -30,6 +30,7 @@ class Auth {
     return {
       token: accessToken,
       username: user.name,
+      email: username || user.username,
       role: user.role,
     };
   }

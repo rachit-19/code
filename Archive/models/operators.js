@@ -70,6 +70,23 @@ class Operator {
     });
   }
 
+  static getOperatorByStationId(operatorId) {
+    return new Promise((resolve, reject) => {
+      const query = "SELECT * FROM operators WHERE station_id = ?";
+      db.query(query, [operatorId], (err, rows) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (rows.length === 0) {
+          resolve(null);
+          return;
+        }
+        resolve(rows[0]);
+      });
+    });
+  }
+
   static updateOperator(operatorId, operatorData) {
     return new Promise((resolve, reject) => {
       const { operator_name, station_id } = operatorData;
