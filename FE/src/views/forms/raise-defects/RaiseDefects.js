@@ -14,11 +14,14 @@ import {
 } from '@coreui/react'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { useSelector } from 'react-redux'
 
 const RaiseDefect = () => {
+  const user = useSelector((state) => state.auth.user)
   const [defects, setDefects] = useState([])
   const [actions, setActions] = useState([])
   const [formData, setFormData] = useState({
+    user: user.email,
     engineSerialNumber: '',
     defect: [],
     actionTaken: [],

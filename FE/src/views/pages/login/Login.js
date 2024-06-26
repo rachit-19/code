@@ -43,8 +43,10 @@ const Login = ({ onLogin }) => {
       if (response.data.token) {
         setError('')
         onLogin()
+        console.log(response, "LOGIN RESP")
         const user = {
           username: response.data.username,
+          email: response.data.email,
           role: response.data.role,
         }
         dispatch(loginSuccess({ user, token: response.data.token }))

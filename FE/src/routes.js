@@ -34,6 +34,7 @@ const NewUser = React.lazy(() => import('./views/forms/new-user/NewUser'))
 const Settings = React.lazy(() => import('./views/forms/settings/Settings'))
 const RaiseDefects = React.lazy(() => import('./views/forms/raise-defects/RaiseDefects'))
 const ZoneUI = React.lazy(() => import('./views/zone-UI/zone'))
+const Reports = React.lazy(() => import('./views/reports/Reports'))
 const Layout = React.lazy(() => import('./views/forms/layout/Layout'))
 const Range = React.lazy(() => import('./views/forms/range/Range'))
 const Select = React.lazy(() => import('./views/forms/select/Select'))
@@ -62,6 +63,7 @@ const routes = [
   { path: '/raiseDefects', name: 'RaiseDefects', element: RaiseDefects },
   { path: '/zoneUI', name: 'ZoneUI', element: ZoneUI },
   { path: '/zoneUI/:id', name: 'ZoneUI', element: ZoneUI },
+  { path: '/reports', name: 'Reports', element: Reports },
 
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },

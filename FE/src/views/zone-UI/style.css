@@ -1,0 +1,24 @@
+.defect-card {
+  width: 100%;
+  transition: background-color 0.5s ease;
+  /* Smooth transition for background color change */
+}
+
+.updated {
+  animation: flashBackground 5s;
+  /* Animation for background color change */
+}
+
+@keyframes flashBackground {
+  0% {
+    background-color: white;
+  }
+
+  50% {
+    background-color: red;
+  }
+
+  100% {
+    background-color: white;
+  }
+}

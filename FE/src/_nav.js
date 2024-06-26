@@ -48,6 +48,11 @@ const _nav = [
   },
   {
     component: CNavItem,
+    name: 'Reports',
+    to: '/reports',
+  },
+  {
+    component: CNavItem,
     name: 'Zone',
     to: '/zoneUI',
   },

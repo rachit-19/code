@@ -3,7 +3,6 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
   defects: [],
-  updated_at: null,
 }
 
 const defectsSlice = createSlice({
@@ -11,12 +10,10 @@ const defectsSlice = createSlice({
   initialState,
   reducers: {
     setDefects: (state, action) => {
-      state.defects = action.payload.defects
-      state.updated_at = action.payload.updated_at // Update updated_at state
+      state.defects = action.payload
     },
     clearDefects: (state) => {
       state.defects = []
-      state.updated_at = null // Reset updated_at state
     },
   },
 })
@@ -27,24 +24,33 @@ export const { setDefects, clearDefects } = defectsSlice.actions
 // Selector function to filter defects by screen_no
 export const selectDefectsByScreenNo = (state, screenNo) => {
   if (!screenNo) {
-    return state.defects.defects
+    return state.defects.defects || []
   }
-  console.log(state.defects)
 
-  const defects = screenNo
-    ? state.defects.defects.filter((defect) => defect.screen_no === screenNo)
-    : state.defects.defects
+console.log(state.defects.defects, "Defects 1")
+  const defects =
+    screenNo && state.defects.defects
+      ? state.defects.defects.filter((defect) => defect.screen_no === screenNo)
+      : state.defects.defects ? state.defects.defects : []
 
-  const defectMap = new Map()
+      const defectMap = new Map()
 
+      console.log(defects, "defect 1")
   defects.forEach((defect) => {
     if (defectMap.has(defect.id)) {
       const existingDefect = defectMap.get(defect.id)
-      existingDefect.count += 1
+      existingDefect.count += 1,
+      existingDefect.updated_at = new Date()
     } else {
-      defectMap.set(defect.id, { ...defect, count: defect.count || 1 })
+      defectMap.set(defect.id, {
+        ...defect,
+        count: defect.count || 1,
+        updated_at: defect.updated_at || new Date(),
+      })
     }
   })
+
+  console.log(state.defects.defects, 'Defects 2')
 
   return Array.from(defectMap.values())
   // return state.defects.defects.filter((defect) => defect.screen_no === screenNo)
