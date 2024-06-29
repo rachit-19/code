@@ -17,10 +17,10 @@ wss.on("connection", (ws) => {
   });
 });
 function notifyClients(data) {
-  console.log("Notifying clients:", data, clients.length);
+  console.log("Notifying clients:", JSON.stringify(data));
   clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
-      console.log("inside if")
+      // console.log("inside if")
       try {
         client.send(JSON.stringify(data));
       } catch (error) {
@@ -43,7 +43,7 @@ exports.createRaisedDefect = async (req, res) => {
       defects.map((id) => Operators.getOperatorByStationId(id.station_id))
     );
 
-    console.log(newDefect, "hello")
+    // console.log(newDefect, "hello")
     notifyClients({
       ...req.body,
       defects,
