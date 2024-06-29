@@ -21,7 +21,6 @@ const RaiseDefect = () => {
   const [defects, setDefects] = useState([])
   const [actions, setActions] = useState([])
   const [formData, setFormData] = useState({
-    user: user.email,
     engineSerialNumber: '',
     defect: [],
     actionTaken: [],
@@ -78,7 +77,7 @@ const RaiseDefect = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post('http://localhost:4000/raise_defects', formData, {
+      const response = await axios.post('http://localhost:4000/raise_defects', {...formData, user: user.email}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

@@ -37,12 +37,12 @@ console.log(state.defects.defects, "Defects 1")
 
       console.log(defects, "defect 1")
   defects.forEach((defect) => {
-    if (defectMap.has(defect.id)) {
-      const existingDefect = defectMap.get(defect.id)
+    if (defectMap.has(defect.defect_name)) {
+      const existingDefect = defectMap.get(defect.defect_name)
       existingDefect.count += 1,
       existingDefect.updated_at = new Date()
     } else {
-      defectMap.set(defect.id, {
+      defectMap.set(defect.defect_name, {
         ...defect,
         count: defect.count || 1,
         updated_at: defect.updated_at || new Date(),
