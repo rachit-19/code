@@ -16,6 +16,30 @@ class Operator {
     });
   }
 
+  // static createBulkOperators(operators) {
+  //   return new Promise((resolve, reject) => {
+  //     if (!Array.isArray(operators) || operators.length === 0) {
+  //       reject(new Error("Invalid input: expected an array of operators"));
+  //       return;
+  //     }
+
+  //     const query =
+  //       "INSERT INTO operators (operator_name, station_id) VALUES ?";
+  //     const values = operators.map((operator) => [
+  //       operator.operator_name,
+  //       operator.station_id,
+  //     ]);
+
+  //     db.query(query, [values], (err, result) => {
+  //       if (err) {
+  //         reject(err);
+  //         return;
+  //       }
+  //       resolve(result);
+  //     });
+  //   });
+  // }
+
   static createBulkOperators(operators) {
     return new Promise((resolve, reject) => {
       if (!Array.isArray(operators) || operators.length === 0) {
@@ -23,19 +47,29 @@ class Operator {
         return;
       }
 
-      const query =
-        "INSERT INTO operators (operator_name, station_id) VALUES ?";
-      const values = operators.map((operator) => [
-        operator.operator_name,
-        operator.station_id,
-      ]);
-
-      db.query(query, [values], (err, result) => {
-        if (err) {
-          reject(err);
+      // First, delete all existing operators
+      const deleteQuery = "DELETE FROM operators";
+      db.query(deleteQuery, (deleteErr, deleteResult) => {
+        if (deleteErr) {
+          reject(deleteErr);
           return;
         }
-        resolve(result);
+
+        // Proceed with inserting new operators
+        const insertQuery =
+          "INSERT INTO operators (operator_name, station_id) VALUES ?";
+        const values = operators.map((operator) => [
+          operator.operator_name,
+          operator.station_id,
+        ]);
+
+        db.query(insertQuery, [values], (insertErr, insertResult) => {
+          if (insertErr) {
+            reject(insertErr);
+            return;
+          }
+          resolve(insertResult);
+        });
       });
     });
   }

@@ -15,6 +15,26 @@ class Actions {
     });
   }
 
+  // static createBulkActions(actions) {
+  //   return new Promise((resolve, reject) => {
+  //     if (!Array.isArray(actions) || actions.length === 0) {
+  //       reject(new Error("Invalid input: expected an array of actions"));
+  //       return;
+  //     }
+
+  //     const query = "INSERT INTO actions (action_name) VALUES ?";
+  //     const values = actions.map((action) => [action.action_name]);
+
+  //     db.query(query, [values], (err, result) => {
+  //       if (err) {
+  //         reject(err);
+  //         return;
+  //       }
+  //       resolve(result);
+  //     });
+  //   });
+  // }
+
   static createBulkActions(actions) {
     return new Promise((resolve, reject) => {
       if (!Array.isArray(actions) || actions.length === 0) {
@@ -22,15 +42,25 @@ class Actions {
         return;
       }
 
-      const query = "INSERT INTO actions (action_name) VALUES ?";
-      const values = actions.map((action) => [action.action_name]);
-
-      db.query(query, [values], (err, result) => {
-        if (err) {
-          reject(err);
+      // First, delete all existing actions
+      const deleteQuery = "DELETE FROM actions";
+      db.query(deleteQuery, (deleteErr, deleteResult) => {
+        if (deleteErr) {
+          reject(deleteErr);
           return;
         }
-        resolve(result);
+
+        // Proceed with inserting new actions
+        const insertQuery = "INSERT INTO actions (action_name) VALUES ?";
+        const values = actions.map((action) => [action.action_name]);
+
+        db.query(insertQuery, [values], (insertErr, insertResult) => {
+          if (insertErr) {
+            reject(insertErr);
+            return;
+          }
+          resolve(insertResult);
+        });
       });
     });
   }

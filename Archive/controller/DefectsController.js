@@ -26,7 +26,7 @@ exports.createBulkDefect = async (req, res) => {
     await Defect.createBulkDefects(req.body);
     res.status(201).send("Bulk Defect created successfully");
     // Optionally notify clients about the bulk upload
-    req.body.forEach((defect) => notifyClients(defect));
+    // req.body.forEach((defect) => notifyClients(defect));
   } catch (err) {
     console.error("Error creating bulk defect:", err);
     res.status(500).send("Error creating bulk defect");

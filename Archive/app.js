@@ -157,6 +157,66 @@ app.get("/api/zone-records", async (req, res) => {
   }
 });
 
+// Route to handle inserting or updating timer value
+app.post('/settings', (req, res) => {
+  const { alert_timer } = req.body;
+
+  // Check if a record already exists
+  const selectQuery = 'SELECT * FROM settings LIMIT 1';
+  db.query(selectQuery, (err, rows) => {
+    if (err) {
+      console.error('Error selecting timer value:', err);
+      res.status(500).json({ error: 'Failed to check timer value' });
+      return;
+    }
+
+    if (rows.length > 0) {
+      // If record exists, update it
+      const updateQuery = `UPDATE settings SET alert_timer = ${alert_timer}`;
+      db.query(updateQuery, (err, result) => {
+        if (err) {
+          console.error('Error updating timer value:', err);
+          res.status(500).json({ error: 'Failed to update timer value' });
+          return;
+        }
+        console.log('Timer value updated successfully');
+        res.status(200).json({ message: 'Timer value updated successfully' });
+      });
+    } else {
+      // If no record exists, insert a new one
+      const insertQuery = `INSERT INTO settings (alert_timer) VALUES (${alert_timer})`;
+      db.query(insertQuery, (err, result) => {
+        if (err) {
+          console.error('Error inserting timer value:', err);
+          res.status(500).json({ error: 'Failed to add timer value' });
+          return;
+        }
+        console.log('Timer value added successfully');
+        res.status(201).json({ message: 'Timer value added successfully' });
+      });
+    }
+  });
+});
+
+// Route to fetch alert_timer value
+app.get('/settings/alert_timer', (req, res) => {
+  const selectQuery = 'SELECT alert_timer FROM settings LIMIT 1';
+  db.query(selectQuery, (err, rows) => {
+    if (err) {
+      console.error('Error fetching alert_timer:', err);
+      res.status(500).json({ error: 'Failed to fetch alert_timer value' });
+      return;
+    }
+
+    if (rows.length > 0) {
+      const alertTimerValue = rows[0].alert_timer;
+      res.status(200).json({ alert_timer: alertTimerValue });
+    } else {
+      res.status(404).json({ message: 'Alert timer value not found' });
+    }
+  });
+});
+
 async function uploadData(filePath) {
   const workbook = XLSX.readFile(filePath);
   const sheetName = workbook.SheetNames[0];

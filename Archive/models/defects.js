@@ -16,27 +16,62 @@ class Defect {
     });
   }
 
-  static createBulkDefects(defects) {
+  // static createBulkDefects(defects) {
+  //   return new Promise((resolve, reject) => {
+  //     if (!Array.isArray(defects) || defects.length === 0) {
+  //       reject(new Error("Invalid input: expected an array of defects"));
+  //       return;
+  //     }
+
+  //     const query =
+  //       "INSERT INTO defects (defect_name, station_id, screen_no) VALUES ?";
+  //     const values = defects.map((defect) => [
+  //       defect.defect_name,
+  //       defect.station_id,
+  //       defect.screen_no,
+  //     ]);
+
+  //     db.query(query, [values], (err, result) => {
+  //       if (err) {
+  //         reject(err);
+  //         return;
+  //       }
+  //       resolve(result);
+  //     });
+  //   });
+  // }
+
+  static async createBulkDefects(defects) {
     return new Promise((resolve, reject) => {
       if (!Array.isArray(defects) || defects.length === 0) {
         reject(new Error("Invalid input: expected an array of defects"));
         return;
       }
 
-      const query =
-        "INSERT INTO defects (defect_name, station_id, screen_no) VALUES ?";
-      const values = defects.map((defect) => [
-        defect.defect_name,
-        defect.station_id,
-        defect.screen_no,
-      ]);
-
-      db.query(query, [values], (err, result) => {
-        if (err) {
-          reject(err);
+      // First, delete all existing defects
+      const deleteQuery = "DELETE FROM defects";
+      db.query(deleteQuery, (deleteErr, deleteResult) => {
+        if (deleteErr) {
+          reject(deleteErr);
           return;
         }
-        resolve(result);
+
+        // Proceed with inserting new defects
+        const insertQuery =
+          "INSERT INTO defects (defect_name, station_id, screen_no) VALUES ?";
+        const values = defects.map((defect) => [
+          defect.defect_name,
+          defect.station_id,
+          defect.screen_no,
+        ]);
+
+        db.query(insertQuery, [values], (insertErr, insertResult) => {
+          if (insertErr) {
+            reject(insertErr);
+            return;
+          }
+          resolve(insertResult);
+        });
       });
     });
   }
