@@ -5,7 +5,7 @@
 }
 
 .updated {
-  animation: flashBackground 5s;
+  animation: flashBackground;
   /* Animation for background color change */
 }
 

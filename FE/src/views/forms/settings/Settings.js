@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import {
   CButton,
@@ -21,11 +21,37 @@ const Settings = () => {
   const fileInputRef = useRef(null)
   const operatorFileInputRef = useRef(null)
   const actionFileInputRef = useRef(null)
+  const [timer, setTimer] = useState('')
   const user = useSelector((state) => state.auth.user)
 
   const [defectsData, setDefectsData] = useState([])
   const [operatorsData, setOperatorsData] = useState([])
   const [actionsData, setActionsData] = useState([])
+
+  useEffect(() => {
+    // Fetch alert_timer value from backend on component mount
+    const fetchAlertTimer = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/settings/alert_timer', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+        if (response.status === 200) {
+          sessionStorage.setItem('alert_timer', response.data.alert_timer)
+          setTimer(response.data.alert_timer)
+        } else {
+          toast.error('Failed to fetch alert timer value')
+        }
+      } catch (error) {
+        console.error('Error fetching alert timer:', error)
+        toast.error('Failed to fetch alert timer value')
+      }
+    }
+
+    fetchAlertTimer()
+  }, [])
+
   const handleDefectsChange = (event) => {
     const file = event.target.files[0]
     const reader = new FileReader()
@@ -58,8 +84,6 @@ const Settings = () => {
 
       setError('')
       setDefectsData(formattedData)
-
-
     }
 
     reader.onerror = () => {
@@ -84,7 +108,6 @@ const Settings = () => {
 
       const requiredColumns = ['station_id', 'operator_name']
       const columns = Object.keys(json[0])
-      console.log(requiredColumns, columns, "Columns")
 
       const hasRequiredColumns = requiredColumns.every((col) => columns.includes(col))
 
@@ -102,9 +125,6 @@ const Settings = () => {
 
       setError('')
       setOperatorsData(formattedData)
-      console.log(formattedData)
-
-
     }
 
     reader.onerror = () => {
@@ -129,7 +149,6 @@ const Settings = () => {
 
       const requiredColumns = ['action_name']
       const columns = Object.keys(json[0])
-      console.log(requiredColumns, columns, 'Columns')
 
       const hasRequiredColumns = requiredColumns.every((col) => columns.includes(col))
 
@@ -146,8 +165,6 @@ const Settings = () => {
 
       setError('')
       setActionsData(formattedData)
-
-
     }
 
     reader.onerror = () => {
@@ -173,8 +190,8 @@ const Settings = () => {
     e.preventDefault()
     try {
       console.log(defectsData, operatorsData, actionsData)
-      if(defectsData.length>0){
-          try {
+      if (defectsData.length > 0) {
+        try {
           const response = await axios.post(
             'http://localhost:4000/defects/bulk_defects',
             defectsData,
@@ -232,16 +249,39 @@ const Settings = () => {
             setError('')
             toast.success('Bulk Actions added successfully')
           } else {
-            toast.error('Failed to upload defects')
+            toast.error('Failed to upload actions')
           }
         } catch (error) {
           console.error('Error creating bulk actions:', error)
           toast.error('Failed to upload actions')
         }
       }
+
+      // Inserting timer value
+      if (timer) {
+        try {
+          const response = await axios.post(
+            'http://localhost:4000/settings',
+            { alert_timer: timer },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+            },
+          )
+          if (response.status !== 500) {
+            toast.success('Timer value updated successfully')
+          } else {
+            toast.error('Failed to add timer value')
+          }
+        } catch (error) {
+          console.error('Error adding timer value:', error)
+          toast.error('Failed to add timer value')
+        }
+      }
     } catch (error) {
       console.error('Error updating settings:', error)
-      toast.error('Failed to upload settings')
+      toast.error('Failed to update settings')
     }
   }
 
@@ -287,22 +327,35 @@ const Settings = () => {
                   Sample Excel
                 </CButton>
               </div>
-              {user.role === "admin" &&
+              {user.role === 'admin' && (
+                <div className="mb-3">
+                  <label htmlFor="field3">Action Taken </label>
+                  <br />
+                  <input
+                    type="file"
+                    id="field3"
+                    accept=".xlsx"
+                    onChange={handleActionChange}
+                    ref={actionFileInputRef}
+                  />
+                  <CFormFeedback invalid>Please upload an Excel file (.xlsx)</CFormFeedback>
+                  <CButton color="info" onClick={() => generateSampleExcel('field3')}>
+                    Sample Excel
+                  </CButton>
+                </div>
+              )}
               <div className="mb-3">
-                <label htmlFor="field3">Action Taken </label>
-                <br />
+                <label htmlFor="timer">Timer (seconds)</label>
                 <input
-                  type="file"
-                  id="field3"
-                  accept=".xlsx"
-                  onChange={handleActionChange}
-                  ref={actionFileInputRef}
+                  type="number"
+                  id="timer"
+                  value={timer}
+                  onChange={(e) => setTimer(e.target.value)}
+                  className="form-control"
+                  min="1"
+                  required
                 />
-                <CFormFeedback invalid>Please upload an Excel file (.xlsx)</CFormFeedback>
-                <CButton color="info" onClick={() => generateSampleExcel('field3')}>
-                  Sample Excel
-                </CButton>
-              </div>}
+              </div>
               <CButton type="submit" color="primary">
                 Submit
               </CButton>

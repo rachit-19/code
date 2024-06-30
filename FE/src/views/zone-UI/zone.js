@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react'
+import React, { useEffect, useRef, useMemo, useState } from 'react'
 import { CCard, CCardBody, CCardSubtitle, CCardText, CCardTitle, CCol, CRow, CTable, CTableBody, CTableDataCell, CTableHeaderCell, CTableRow } from '@coreui/react'
 import useWebSocket from 'react-use-websocket'
 import { useParams } from 'react-router-dom'
@@ -12,6 +12,7 @@ const Zone = () => {
   const dispatch = useDispatch()
   const defects = useSelector((state) => selectDefectsByScreenNo(state, id))
   const prevDefectsRef = useRef(defects)
+  const [alertTimer, setAlertTimer] = useState(5)
 
   const { sendMessage, lastMessage, readyState } = useWebSocket('ws://localhost:1111', {
     onOpen: () => console.log('WebSocket connection established'),
@@ -77,6 +78,30 @@ const Zone = () => {
       console.log('Zone ID:', id)
     }
   }, [id])
+
+  useEffect(() => {
+    // Fetch alert_timer value from backend on component mount
+    const fetchAlertTimer = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/settings/alert_timer', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+        if (response.status === 200) {
+          sessionStorage.setItem('alert_timer', response.data.alert_timer)
+          setAlertTimer(response.data.alert_timer)
+        } else {
+          toast.error('Failed to fetch alert timer value')
+        }
+      } catch (error) {
+        console.error('Error fetching alert timer:', error)
+        toast.error('Failed to fetch alert timer value')
+      }
+    }
+
+    fetchAlertTimer()
+  }, [])
 
   useEffect(() => {
     if (lastMessage !== null) {
@@ -150,53 +175,55 @@ const Zone = () => {
           dispatch(
             setDefects(defects.map((d) => (d.id === defect.id ? { ...d, is_updated: false } : d))),
           )
-        }, 5000)
+        }, parseInt(alertTimer)*1000 || 5000)
 
         return () => clearTimeout(timer)
       }
     })
   }, [defectsArr, dispatch])
 
-
  return (
-  <div>
-    <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
-      Engine Assembly Line Defect Monitoring System - Zone {id || "-"}
-    </h2>
-    <CRow className="g-4">
-      {defectsArr.length > 0 &&
-        defectsArr.map((defect, index) => (
-          <CCol xs={12} sm={6} md={4} key={index}>
-            <CCard className={`defect-card ${defect.is_updated ? 'updated' : ''}`}>
-              <CCardBody>
-                <CTable>
-                  <CTableBody>
-                    <CTableRow>
-                      <CTableHeaderCell scope="row">Defect Name</CTableHeaderCell>
-                      <CTableHeaderCell scope="row">Operator Name</CTableHeaderCell>
-                      <CTableHeaderCell scope="row">Count</CTableHeaderCell>
-                    </CTableRow>
-                    <CTableRow>
-                      <CTableDataCell>{defect.defect_name}</CTableDataCell>
-                      <CTableDataCell>{defect.operator_name}</CTableDataCell>
-                      <CTableDataCell>{defect.count || 1}</CTableDataCell>
-                    </CTableRow>
+   <div>
+     <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
+       Engine Assembly Line Defect Monitoring System - Zone {id || '-'}
+     </h2>
+     <CRow className="g-4">
+       {defectsArr.length > 0 &&
+         defectsArr.map((defect, index) => (
+           <CCol xs={12} sm={6} md={4} key={index}>
+             <CCard
+               className={`defect-card ${defect.is_updated ? 'updated' : ''}`}
+               style={defect.is_updated ? { animationDuration: `${alertTimer}s` } : {}}
+             >
+               <CCardBody>
+                 <CTable>
+                   <CTableBody>
+                     <CTableRow>
+                       <CTableHeaderCell scope="row">Defect Name</CTableHeaderCell>
+                       <CTableHeaderCell scope="row">Operator Name</CTableHeaderCell>
+                       <CTableHeaderCell scope="row">Count</CTableHeaderCell>
+                     </CTableRow>
+                     <CTableRow>
+                       <CTableDataCell>{defect.defect_name}</CTableDataCell>
+                       <CTableDataCell>{defect.operator_name}</CTableDataCell>
+                       <CTableDataCell>{defect.count || 1}</CTableDataCell>
+                     </CTableRow>
 
-                    {/* Assuming you want another row with the same data */}
-                    <CTableRow>
-                      <CTableDataCell>{defect.defect_name}</CTableDataCell>
-                      <CTableDataCell>{defect.operator_name}</CTableDataCell>
-                      <CTableDataCell>{defect.count || 1}</CTableDataCell>
-                    </CTableRow>
-                  </CTableBody>
-                </CTable>
-              </CCardBody>
-            </CCard>
-          </CCol>
-        ))}
-    </CRow>
-  </div>
-);
+                     {/* Assuming you want another row with the same data */}
+                     <CTableRow>
+                       <CTableDataCell>{defect.defect_name}</CTableDataCell>
+                       <CTableDataCell>{defect.operator_name}</CTableDataCell>
+                       <CTableDataCell>{defect.count || 1}</CTableDataCell>
+                     </CTableRow>
+                   </CTableBody>
+                 </CTable>
+               </CCardBody>
+             </CCard>
+           </CCol>
+         ))}
+     </CRow>
+   </div>
+ )
 
 }
 

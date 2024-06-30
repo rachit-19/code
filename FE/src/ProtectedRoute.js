@@ -7,9 +7,22 @@ const ProtectedRoute = ({ Component, isAuthenticated, ...rest }) => {
   const user = useSelector((state) => state.auth.user)
   const location = useLocation()
   const currentPath = location.pathname
+
+  console.log(currentPath, 'currentPath')
+  if (currentPath.includes('/zone')) {
+    return (
+      <div>
+        <div style={{ flexGrow: 1, padding: '20px' }}>
+          <Component {...rest} />
+        </div>
+      </div>
+    )
+  }
   if (!isAuthenticated) {
     return <Navigate to="/" />
   }
+
+
 
   if (user.role ==="user" && isAuthenticated && currentPath !== '/raiseDefects') {
     return <Navigate to="/raiseDefects" />
